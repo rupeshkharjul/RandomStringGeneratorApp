@@ -35,7 +35,7 @@ class RandomStringViewModel : ViewModel() {
                 cursor?.use {
                     if (it.moveToFirst()) {
 
-                        val jsonStr = it.getString(it.getColumnIndexOrThrow(ContentContract.JsonEntry.DATA_OBJ))
+                        val jsonStr = it.getString(it.getColumnIndexOrThrow(ContentContract.DATA_OBJ))
                         try {
 
                             val payload = Gson().fromJson(jsonStr, RandomTextPayload::class.java)  // Use Gson to parse the json
