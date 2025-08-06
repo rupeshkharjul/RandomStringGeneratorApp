@@ -13,6 +13,9 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 
 class RandomStringViewModel : ViewModel() {
     var stringDataState = mutableStateListOf<StringData>() /*Use mutable state to update the data as list*/
@@ -41,12 +44,12 @@ class RandomStringViewModel : ViewModel() {
                             val payload = Gson().fromJson(jsonStr, RandomTextPayload::class.java)  // Use Gson to parse the json
                             val randomText = payload.randomText
 
+                            val formattedDate = formatDate(randomText.created)
 
                             // Switch to main thread to update data on activity
                             withContext(Dispatchers.Main) {
                                 stringDataState.add(
-                                    0,
-                                    StringData(value = randomText.value, length = randomText.length, created = randomText.created)
+                                    StringData(value = randomText.value, length = randomText.length, created = formattedDate)
                                 )
                             }
 
@@ -61,6 +64,18 @@ class RandomStringViewModel : ViewModel() {
         }
     }
 
+    private fun formatDate(inputDate: String): String {
+        return try {
+            val inputFormat = SimpleDateFormat(AppConstants.ISO_DATE_FORMAT, Locale.getDefault())
+            inputFormat.timeZone = TimeZone.getTimeZone(AppConstants.UTC_TIME_ZONE)
+            val date = inputFormat.parse(inputDate)
+            val outputFormat = SimpleDateFormat(AppConstants.SIMPLE_DATE_FORMAT, Locale.getDefault())
+            outputFormat.format(date ?: "")
+        } catch (e: Exception) {
+            Log.d("DateParsing", "Error when parsing date ${e.message}")
+            ""
+        }
+    }
 
     fun clearAll() {
         stringDataState.clear()
